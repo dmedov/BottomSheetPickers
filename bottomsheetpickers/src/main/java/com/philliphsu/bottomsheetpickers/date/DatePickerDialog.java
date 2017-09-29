@@ -48,6 +48,7 @@ public class DatePickerDialog extends BottomSheetPickerDialog implements
     private static final int UNINITIALIZED = -1;
     private static final int MONTH_AND_DAY_VIEW = 0;
     private static final int YEAR_VIEW = 1;
+    private static final int DEFAULT_VIEW = MONTH_AND_DAY_VIEW;
 
     private static final String KEY_SELECTED_YEAR = "year";
     private static final String KEY_SELECTED_MONTH = "month";
@@ -90,6 +91,7 @@ public class DatePickerDialog extends BottomSheetPickerDialog implements
     private Button mDoneButton;
     private Button mCancelButton;
 
+    private int mInitViewType = DEFAULT_VIEW; // MONTH_AND_DAY_VIEW or YEAR_VIEW
     private int mCurrentView = UNINITIALIZED;
 
     private int mWeekStart = mCalendar.getFirstDayOfWeek();
@@ -226,7 +228,7 @@ public class DatePickerDialog extends BottomSheetPickerDialog implements
 
         int listPosition = -1;
         int listPositionOffset = 0;
-        int currentView = MONTH_AND_DAY_VIEW;
+        int currentView = mInitViewType;
         int dayPickerCurrentView = DAY_PICKER_INDEX;
         if (savedInstanceState != null) {
             mWeekStart = savedInstanceState.getInt(KEY_WEEK_START);
@@ -389,6 +391,14 @@ public class DatePickerDialog extends BottomSheetPickerDialog implements
     public void onPause() {
         super.onPause();
         mHapticFeedbackController.stop();
+    }
+
+    /**
+     * Set the init picker view type when dialog appear first time
+     * @param type MONTH_AND_DAY_VIEW or YEAR_VIEW
+     */
+    private void setInitViewType(final int type) {
+        mInitViewType = type;
     }
 
     private void setCurrentView(final int viewIndex) {
@@ -839,6 +849,8 @@ public class DatePickerDialog extends BottomSheetPickerDialog implements
         private int mDayOfWeekHeaderTextColorSelected;
         private int mDayOfWeekHeaderTextColorUnselected;
 
+        private int mInitViewType = DEFAULT_VIEW;
+
         /**
          * @param listener    How the parent is notified that the date is set.
          * @param year        The initial year of the dialog.
@@ -965,6 +977,16 @@ public class DatePickerDialog extends BottomSheetPickerDialog implements
             build(dialog);
         }
 
+        public Builder startSelectionFromMonthAndDay() {
+            mInitViewType = MONTH_AND_DAY_VIEW;
+            return this;
+        }
+
+        public Builder startSelectionFromYear() {
+            mInitViewType = YEAR_VIEW;
+            return this;
+        }
+
         @Override
         public DatePickerDialog build() {
             DatePickerDialog dialog = newInstance(mListener, mYear, mMonthOfYear, mDayOfMonth);
@@ -980,6 +1002,7 @@ public class DatePickerDialog extends BottomSheetPickerDialog implements
             datePickerDialog.setDayOfWeekHeaderTextColorSelected(mDayOfWeekHeaderTextColorSelected);
             datePickerDialog.setDayOfWeekHeaderTextColorUnselected(mDayOfWeekHeaderTextColorUnselected);
             datePickerDialog.setFirstDayOfWeek(mWeekStart);
+            datePickerDialog.setInitViewType(mInitViewType);
             if (mMinDate != null) {
                 datePickerDialog.setMinDate(mMinDate);
             }
